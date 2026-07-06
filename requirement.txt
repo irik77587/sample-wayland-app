@@ -1,0 +1,2 @@
+wayland-scanner
+wayland-protocol

@@ -1,54 +1,26 @@
-CC:=gcc
-XDG_BAK_DIR:=xdg-bak
-SOURCE_DIR:=source
-BUILD_DIR:=build
+# Define unchanged global variables
+CC = gcc
+CFLAGS = -O2 -Wall
+LIBS = -lwayland-client
 
-XDG_API_STABLE:=stable
-XDG_API_STAGING:=staging
-XDG_API_UNSTABLE:=unstable
+SOURCE_DIR = source
 
-XDG_SOURCE:=/usr/share/wayland-protocols/$(XDG_API_STABLE)/xdg-shell/xdg-shell.xml
-XDG_TARGETS:=$(SOURCE_DIR)/xdg-shell.c $(SOURCE_DIR)/xdg-client.h
-TARGET:=main
+STABLE = stable
+STANDING = standing
+UNSTABLE = unstable
+XDG_API_STABLE = /usr/share/wayland-protocols/$(STABLE)/xdg-shell/xdg-shell.xml
+XDG_API = $(XDG_API_STABLE)
 
-.PHONY: all debug release clean
+API_HEADER = xdg-protocol.h
+API_SOURCE = xdg-protocol.c
 
-# 1. Default to debug if no target is specified
-all: debug
+# Export them to any sub-make processes
+export CC CFLAGS LIBS XDG_API API_HEADER API_SOURCE
 
-# 2. Target-specific variables. They apply to the target AND its prerequisites.
-debug: BUILD_CONFIG := debug
-debug: CFLAG := -ggdb
-debug: $(BUILD_DIR)/debug/$(TARGET)
+.PHONY: all clean
 
-release: BUILD_CONFIG := release
-release: CFLAG := -O2
-release: $(BUILD_DIR)/release/$(TARGET)
-
-# 3. Pattern match for the final binary destination
-$(BUILD_DIR)/%/$(TARGET): $(SOURCE_DIR)/$(TARGET).c $(XDG_TARGETS)
-	mkdir -p $(dir $@)
-	$(CC) $< $(SOURCE_DIR)/xdg-shell.c -o $@ -lwayland-client $(CFLAG)
-
-# ---
-
-.ONESHELL:
-$(XDG_TARGETS): ${XDG_SOURCE}
-	if [ -d /usr/share/wayland-protocols ]; then \
-		wayland-scanner private-code ${XDG_SOURCE} $(SOURCE_DIR)/xdg-shell.c \
-		wayland-scanner client-header ${XDG_SOURCE} $(SOURCE_DIR)/xdg-shell.h \
-		echo "[SUCCESS] System-wide development dependency resolved" \
-	else \
-		echo "[WARN] System-wide installation of dependency unmet: wayland-protocols is not installed system-wide (optional)" \
-		if [ -f $(XDG_BAK_DIR)/xdg-shell.c ] && [ -f $(XDG_BAK_DIR)/xdg-shell.h ]; then \
-			cp $(XDG_BAK_DIR)/xdg-shell.c $(SOURCE_DIR)/ \
-			cp $(XDG_BAK_DIR)/xdg-shell.h $(SOURCE_DIR)/ \
-			echo "[INFO] Using local copy of dependency to mitigate dependency" \
-		else \
-			echo "[ERROR] Local installation of dependency unmet"; \
-			echo "[HELP] Install wayland-protocol system-wise to resolve dependency"; \
-		fi; \
-	fi;
+all:
+	$(MAKE) -C $(SOURCE_DIR) all
 
 clean:
-	rm -rf $(BUILD_DIR)
+	$(MAKE) -C $(SOURCE_DIR) clean

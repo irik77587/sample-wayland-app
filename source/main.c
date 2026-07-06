@@ -6,7 +6,7 @@
 #include <wayland-client-protocol.h>
 #include <wayland-client.h>
 #include <string.h>
-#include "xdg-shell.h"
+#include "xdg-protocol.h"
 
 #define WAYLAND_DISPLAY NULL
 
@@ -109,17 +109,19 @@ wl_seat_capabilities(void *data, struct wl_seat *seat,
 	uint32_t capabilities)
 {
 	struct interface_handles *handles = data;
-	/* TODO */
+
 	if(capabilities & WL_SEAT_CAPABILITY_KEYBOARD)
 	{
 		fprintf(stderr, "Keyboard detected\n");
 		handles->keyboard = wl_seat_get_keyboard(seat);
 	}
+
 	if(capabilities & WL_SEAT_CAPABILITY_POINTER)
 	{
 		fprintf(stderr, "Mouse or TouchPad detected\n");
 		handles->pointer = wl_seat_get_pointer(seat);
 	}
+
 	if(capabilities & WL_SEAT_CAPABILITY_TOUCH)
 	{
 		fprintf(stderr, "Touchscreen or graphics tablet detected\n");

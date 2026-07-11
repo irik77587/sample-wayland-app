@@ -1,2 +1,3 @@
 wayland-scanner
 wayland-protocol
+cursor-shape-v1

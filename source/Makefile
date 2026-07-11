@@ -9,15 +9,21 @@ SOURCE = main.c
 all : $(TARGET)
 
 
-$(TARGET) : $(SOURCE) $(API_SOURCE) $(API_HEADER)
+$(TARGET) : $(SOURCE) $(XDG_API_SOURCE) $(XDG_API_HEADER) $(CURSOR_SHAPE_API_SOURCE) $(CURSOR_SHAPE_API_HEADER)
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(SOURCE) $(API_SOURCE) -o $(TARGET) $(LIBS)
+	$(CC) $(CFLAGS) $(SOURCE) $(XDG_API_SOURCE) $(CURSOR_SHAPE_API_SOURCE) -o $(TARGET) $(LIBS)
 
-$(API_HEADER) : $(XDG_API)
-	wayland-scanner client-header $(XDG_API) $(API_HEADER)
+$(CURSOR_SHAPE_API_HEADER) : $(CURSOR_SHAPE_API)
+	wayland-scanner client-header $(CURSOR_SHAPE_API) $(CURSOR_SHAPE_API_HEADER)
 
-$(API_SOURCE) : $(XDG_API)
-	wayland-scanner private-code $(XDG_API) $(API_SOURCE)
+$(CURSOR_SHAPE_API_SOURCE) : $(CURSOR_SHAPE_API)
+	wayland-scanner private-code $(CURSOR_SHAPE_API) $(CURSOR_SHAPE_API_SOURCE)
+
+$(XDG_API_HEADER) : $(XDG_API)
+	wayland-scanner client-header $(XDG_API) $(XDG_API_HEADER)
+
+$(XDG_API_SOURCE) : $(XDG_API)
+	wayland-scanner private-code $(XDG_API) $(XDG_API_SOURCE)
 
 clean :
-	rm -rf $(BUILD_DIR) $(API_HEADER) $(API_SOURCE)
+	rm -rf $(BUILD_DIR) $(XDG_API_HEADER) $(XDG_API_SOURCE) $(CURSOR_SHAPE_API_HEADER) $(CURSOR_SHAPE_API_SOURCE)

@@ -1,29 +1,20 @@
-BUILD_DIR = ../BUILD
+SOURCE=canvas.cpp events.cpp listeners.cpp main.cpp register.cpp window.cpp xdg-protocol.c
+LFLAGS=-lwayland-client -lwayland-cursor
+CFLAGS=-g -DDEBUG
 
-TARGET = $(BUILD_DIR)/hello
-SOURCE = main.c
+.PHONY:build run clean dev
+
+dev: $(TARGET)
+
+build: CFLAGS=-O3
+build: $(TARGET)
+
+run:
+	$(TARGET)
+
+clean:
+	rm -f $(TARGET)
 
 
-.PHONY : clean all
-
-all : $(TARGET)
-
-
-$(TARGET) : $(SOURCE) $(XDG_API_SOURCE) $(XDG_API_HEADER) $(CURSOR_SHAPE_API_SOURCE) $(CURSOR_SHAPE_API_HEADER)
-	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(SOURCE) $(XDG_API_SOURCE) $(CURSOR_SHAPE_API_SOURCE) -o $(TARGET) $(LIBS)
-
-$(CURSOR_SHAPE_API_HEADER) : $(CURSOR_SHAPE_API)
-	wayland-scanner client-header $(CURSOR_SHAPE_API) $(CURSOR_SHAPE_API_HEADER)
-
-$(CURSOR_SHAPE_API_SOURCE) : $(CURSOR_SHAPE_API)
-	wayland-scanner private-code $(CURSOR_SHAPE_API) $(CURSOR_SHAPE_API_SOURCE)
-
-$(XDG_API_HEADER) : $(XDG_API)
-	wayland-scanner client-header $(XDG_API) $(XDG_API_HEADER)
-
-$(XDG_API_SOURCE) : $(XDG_API)
-	wayland-scanner private-code $(XDG_API) $(XDG_API_SOURCE)
-
-clean :
-	rm -rf $(BUILD_DIR) $(XDG_API_HEADER) $(XDG_API_SOURCE) $(CURSOR_SHAPE_API_HEADER) $(CURSOR_SHAPE_API_SOURCE)
+$(TARGET) : $(SOURCE)
+	gcc $(CFLAGS) $(SOURCE) -o $(TARGET) $(LFLAGS)

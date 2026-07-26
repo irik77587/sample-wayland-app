@@ -1,7 +1,4 @@
 SOURCE_DIR=source
-TARGET=../build/metaform
-# TARGET is relative to source directory, not this/project directory
-export TARGET
 
 .PHONY: build dev run clean
 

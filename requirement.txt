@@ -2,3 +2,5 @@ wayland-scanner
 wayland-protocol
 wayland-cursor
 xdg-shell
+dbus-1
+pkg-config

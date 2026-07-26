@@ -12,6 +12,7 @@ void lowlib_set_resize(bool);
 void lowlib_set_window(int width, int height);
 void lowlib_set_bootup(); // Implemented to app, called by connect
 char lowlib_get_window();
+void lowlib_set_border(unsigned char);
 
 enum WINDOW_RESIZE_STATES {
     LOWLIB_WINDOW_NORMAL = 'N',
@@ -20,3 +21,16 @@ enum WINDOW_RESIZE_STATES {
 };
 
 #define XCURSOR_LEFT_POINTER "left_ptr"
+#define XCURSOR_GRAB "fleur"
+
+#define XCURSOR_HORIZONTAL_RESIZE "sb_h_double_arrow"
+#define XCURSOR_VERTICAL_RESIZE "sb_v_double_arrow"
+#define XCURSOR_NW_RESIZE "top_left_corner"
+#define XCURSOR_NE_RESIZE "top_right_corner"
+#define XCURSOR_SW_RESIZE "bottom_left_corner"
+#define XCURSOR_SE_RESIZE "bottom_right_corner"
+
+#define XCURSOR_NWSE_RESIZE "nwse-resize"
+#define XCURSOR_NESW_RESIZE "nesw-resize"
+#define XCURSOR_LEFT_RIGHT_RESIZE "ew-resize"
+#define XCURSOR_UP_DOWN_RESIZE "ns-resize"

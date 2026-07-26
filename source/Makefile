@@ -4,22 +4,22 @@ TARGET_LIB_DIR=../$(BUILD_DIR)
 SOURCE=main.cpp
 TARGET=$(BUILD_DIR)/lowlib-demo
 TARGET_LIB_BIN=lib$(LIB_SOURCE_DIR).so
+CFLAGS?=-g -DDEVBUILD
 
-export TARGET_LIB_DIR TARGET_LIB_BIN
+export TARGET_LIB_DIR TARGET_LIB_BIN CFLAGS
 
-.PHONY: dev build run clean clean_all
+.PHONY: dev build run clean lib
 
-dev: CFLAGS=-g -DDEVBUILD
 dev: $(TARGET)
 
 build: CFLAGS=-O3
 build: $(TARGET)
 
-$(BUILD_DIR)/$(TARGET_LIB_BIN):
+lib:
 	$(MAKE) -C $(LIB_SOURCE_DIR) $(TARGET_LIB_DIR)/$(TARGET_LIB_BIN)
 
 .ONESHELL:
-$(TARGET): $(SOURCE) $(BUILD_DIR)/$(TARGET_LIB_BIN)
+$(TARGET): $(SOURCE) lib
 	export LD_LIBRARY_PATH=$(shell realpath $(BUILD_DIR))
 	gcc $(CFLAGS) $(SOURCE) -o $(TARGET) -L$(BUILD_DIR) -llowlib
 
@@ -30,8 +30,5 @@ run: dev
 	$(TARGET)
 
 clean:
-	rm -f $(TARGET)
-
-clean_all:
 	$(MAKE) -C $(LIB_SOURCE_DIR) clean
-	$(MAKE) clean
+	rm -f $(TARGET)

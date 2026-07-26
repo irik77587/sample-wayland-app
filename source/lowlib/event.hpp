@@ -2,3 +2,4 @@
 #include <wayland-client.h>
 
 extern wl_seat_listener seat_listener;
+extern wl_seat*seat;

@@ -1,5 +1,5 @@
 TARGET_LIB_DIR?=../../build
-TARGET_LIB_BIN?=lowlib.so
+TARGET_LIB_BIN?=liblowlib.so
 XDG_SPEC_FILE=/usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml
 XDG_SOURCE=./inc/xdg-shell.c
 XDG_HEADER=./inc/xdg-shell.h
@@ -15,10 +15,10 @@ $(TARGET_LIB_DIR)/libcursor-theme.so: cursor-theme.cpp
 	gcc -shared -fPIC $(CFLAGS) $(shell pkg-config --cflags dbus-1) cursor-theme.cpp -o $@ $(shell pkg-config --libs dbus-1)
 
 $(XDG_SOURCE): $(XDG_SPEC_FILE) $(XDG_HEADER)
-	wayland-scanner private-code $(XDG_SPEC_FILE) $<
+	wayland-scanner private-code $(XDG_SPEC_FILE) $@
 
 $(XDG_HEADER): $(XDG_SPEC_FILE)
-	wayland-scanner client-header $(XDG_SPEC_FILE) $<
+	wayland-scanner client-header $(XDG_SPEC_FILE) $@
 
 .PHONY: clean
 

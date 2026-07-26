@@ -3,7 +3,7 @@
 #include "shm.hpp"
 #include <wayland-cursor.h>
 #include <wayland-util.h>
-#include "lowlib.hpp"
+#include "../lowlib.hpp"
 
 const char*fallback_set_xcursor(int x, int y);
 const char*(*set_xcursor)(int x,int y) = fallback_set_xcursor;

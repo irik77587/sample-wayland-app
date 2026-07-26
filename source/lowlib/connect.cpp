@@ -1,4 +1,4 @@
-#include "lowlib.hpp"
+#include "../lowlib.hpp"
 #include "registry.hpp"
 #include <cstdio>
 #include <cstdlib>

@@ -1,6 +1,6 @@
 #include "renderer.hpp"
 #include "shm.hpp"
-#include "lowlib.hpp"
+#include "../lowlib.hpp"
 #include <cstdint>
 #include <unistd.h>
 #include <wayland-client.h>

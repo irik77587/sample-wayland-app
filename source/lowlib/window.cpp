@@ -1,5 +1,5 @@
 #include "window.hpp"
-#include "lowlib.hpp"
+#include "../lowlib.hpp"
 #include "registry.hpp"
 #include "renderer.hpp"
 #include <cstdint>

@@ -1,55 +1,25 @@
-#include "interface.hpp"
-#include <cstddef>
-#include <cstdlib>
-#include <wayland-cursor.h>
+#include "lowlib.hpp"
 
-int main() {
-  const char *display_name = getenv("WAYLAND_DISPLAY");
-  if (display_name == nullptr) {
-    display_name = NULL;
-  }
-  // Initialize
-  #ifdef DEBUG
-  fprintf(stderr, "Connecting to display server: %s\n", display_name);
-  #endif
-  wl_display *display = wl_display_connect(display_name);
-  wl_registry *registry = wl_display_get_registry(display);
-#ifdef DEBUG
-  fprintf(stderr, "display and registry initialized\n");
-#endif
+// if resize is set to false, then restore, maximize, minimize, fullscreen are all disabled.
 
-  // Configure constructor
-  struct handles m_handles = {0};
-  wl_registry_add_listener(registry, &listen_registry, &m_handles);
+lowlib_color color_back = {0xfd, 0xc4, 0x7c};
+lowlib_color color_fore = {0xbd, 0xac, 0x5d};
 
-  // Finalize constructor
-  wl_display_roundtrip(display);
-  m_handles.running = 1;
-#ifdef DEBUG
-  fprintf(stderr, "feature registry complete\n");
-#endif
+lowlib_color shader(unsigned short x, unsigned short y, unsigned short x_max, unsigned short y_max)
+{
+    return color_fore;
+}
 
-  // mainloop
-  do {
-#ifdef DEBUG
-    fprintf(stderr, "dispatching\n");
-#endif
-    wl_display_dispatch(display);
-  } while (m_handles.running);
+const char * cursor(int x, int y)
+{
+    const char * cursor = XCURSOR_LEFT_POINTER;
+    return cursor;
+}
 
-  wl_display_roundtrip(display);
-
-  // destructor
-  if (m_handles.cursor_surface) {
-    wl_surface_destroy(m_handles.cursor_surface);
-  }
-
-  if (m_handles.canvas) {
-    wl_surface_destroy(m_handles.canvas);
-  }
-
-  wl_display_roundtrip(display);
-  wl_registry_destroy(registry);
-  wl_display_disconnect(display);
-  return 0;
+void lowlib_set_bootup()
+{
+    lowlib_set_window(480, 360);
+    lowlib_set_resize(false);
+    lowlib_set_cursor(cursor);
+    lowlib_set_shader(shader);
 }

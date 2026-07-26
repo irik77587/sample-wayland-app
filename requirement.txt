@@ -1,3 +1,4 @@
 wayland-scanner
 wayland-protocol
-cursor-shape-v1
+wayland-cursor
+xdg-shell

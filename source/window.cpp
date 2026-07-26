@@ -1,41 +1,95 @@
-#include "interface.hpp"
-#include <wayland-client-protocol.h>
-#include <wayland-util.h>
+#include "window.hpp"
+#include "lowlib.hpp"
+#include "registry.hpp"
+#include "renderer.hpp"
+#include <cstdint>
+#include <wayland-util.hpp>
 
-void xdg_surface_configure(void *, struct xdg_surface *surface,
-                           uint32_t serial) {
+bool resizable_window = true;
+int window_initial_width = 480, window_initial_height = 320;
+char window_resize_state = LOWLIB_WINDOW_NORMAL;
+
+void lowlib_set_resize(bool resizable) { resizable_window = resizable; }
+void lowlib_set_window(int width, int height) {
+  if (window_initial_width < width)
+    window_initial_width = width;
+  if (window_initial_height < height)
+    window_initial_height = height;
+}
+char lowlib_get_window() { return window_resize_state; }
+void xdg_wm_base_ping(void *, xdg_wm_base *wm, uint32_t serial) {
+  xdg_wm_base_pong(wm, serial);
+}
+xdg_wm_base_listener wm_listener = {.ping = xdg_wm_base_ping};
+
+void xdg_surface_configure(void * data, xdg_surface *surface, uint32_t serial) {
   xdg_surface_ack_configure(surface, serial);
+  auto app_state_now = static_cast<app_state*>(data);
+  app_state_now->running = true;
+}
+xdg_surface_listener surface_listener = {.configure = xdg_surface_configure};
+
+void close_window(void *data, xdg_toplevel *) {
+  auto current_app_state = static_cast<app_state*>(data);
+  current_app_state->running = 0;
+}
+void resize_window(void *, xdg_toplevel *, int32_t, int32_t, wl_array *);
+void scale_window(void *, xdg_toplevel *, int32_t, int32_t);
+void window_caps(void*,xdg_toplevel*,wl_array*);
+xdg_toplevel_listener window_listener = {.configure = resize_window,
+                                         .close = close_window,
+                                         .configure_bounds = scale_window,
+                                         .wm_capabilities = window_caps
+};
+
+void scale_window(void *, xdg_toplevel *, int32_t screen_width,
+                  int32_t screen_height) {
+  int32_t shorter_length =
+      screen_height < screen_width ? screen_height : screen_width;
+  if (shorter_length > 1080 and !resizable_window) {
+    window_initial_width = shorter_length;
+    window_initial_height = shorter_length << 1;
+  }
 }
 
-void window_close(void *data, struct xdg_toplevel *) {
-  auto m_handles = static_cast<handles *>(data);
-  m_handles->running = 0;
-}
-struct wl_buffer *draw(struct wl_shm *, uint16_t, uint16_t);
-
-void window_reconfigure(void *data, struct xdg_toplevel *window, int32_t,
-                        int32_t, struct wl_array *states) {
-  auto m_handles = static_cast<handles *>(data);
-  wl_surface_damage(m_handles->canvas, 0, 0, 480, 320);
-  for (auto state = static_cast<uint32_t *>((states)->data);
-       (states)->size != 0 &&
-       reinterpret_cast<const char *>(state) <
-           (static_cast<const char *>((states)->data) + (states)->size);
-       (state)++) {
-    if (XDG_TOPLEVEL_STATE_MAXIMIZED == *state) {
-      xdg_toplevel_unset_fullscreen(window);
-      return;
-    }
+void resize_window(void *, xdg_toplevel *window, int32_t width, int32_t height,
+                   wl_array *states) {
+  int *state;
+  char window_resize_state_impl = LOWLIB_WINDOW_NORMAL;
+  wl_array_for_each_cpp(state, states) {
     if (XDG_TOPLEVEL_STATE_FULLSCREEN == *state) {
-      xdg_toplevel_unset_maximized(window);
-      return;
+      if (resizable_window) {
+        window_resize_state_impl = LOWLIB_WINDOW_FULLSCREEN;
+      } else {
+        xdg_toplevel_unset_fullscreen(window);
+        return;
+      }
+    }
+    if (XDG_TOPLEVEL_STATE_MAXIMIZED == *state && resizable_window) {
+      if (resizable_window) {
+        window_resize_state_impl = LOWLIB_WINDOW_MAXIMIZED;
+      } else {
+        xdg_toplevel_unset_maximized(window);
+        return;
+      }
     }
   }
-  xdg_toplevel_set_max_size(window, 480, 320);
-  wl_buffer *buffer = renderframe(m_handles->shm, 480, 320);
-  wl_surface_attach(m_handles->canvas, buffer, 0, 0);
-  wl_surface_commit(m_handles->canvas);
-  wl_buffer_add_listener(buffer, &listen_buffer, NULL);
+
+  window_resize_state = window_resize_state_impl;
+  if (!resizable_window && LOWLIB_WINDOW_NORMAL == window_resize_state_impl) {
+    xdg_toplevel_set_max_size(window, window_initial_width,
+                              window_initial_height);
+    width = window_initial_width;
+    height = window_initial_height;
+  }
+  create_frame_buffer(width, height);
 }
-void window_preconfigure(void *, struct xdg_toplevel *, int32_t, int32_t) {}
-void window_caps(void *, struct xdg_toplevel *, struct wl_array *) {}
+void window_caps(void*,xdg_toplevel*,wl_array*states) {
+  int*state;
+  wl_array_for_each_cpp(state, states) {
+    if (XDG_TOPLEVEL_STATE_ACTIVATED == *state)
+    {
+      // TODO Explore capabilities
+    }
+  }
+}

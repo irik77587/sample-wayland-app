@@ -5,10 +5,12 @@ SOURCE=main.cpp
 TARGET=$(BUILD_DIR)/lowlib-demo
 TARGET_LIB_BIN=lib$(LIB_SOURCE_DIR).so
 CFLAGS?=-g -DDEVBUILD
+# relative path to dynamic library
+RLPATH=-Wl,-rpath,'$$ORIGIN'/
 
-export TARGET_LIB_DIR TARGET_LIB_BIN CFLAGS
+export TARGET_LIB_DIR TARGET_LIB_BIN CFLAGS RLPATH
 
-.PHONY: dev build run clean lib
+.PHONY: dev build run clean clean_all lib
 
 dev: $(TARGET)
 
@@ -21,7 +23,7 @@ lib:
 .ONESHELL:
 $(TARGET): $(SOURCE) lib
 	export LD_LIBRARY_PATH=$(shell realpath $(BUILD_DIR))
-	gcc $(CFLAGS) $(SOURCE) -o $(TARGET) -L$(BUILD_DIR) -llowlib
+	gcc $(CFLAGS) $(RLPATH) $(SOURCE) -o $(TARGET) -L$(BUILD_DIR) -llowlib
 
 .ONESHELL:
 run: dev
@@ -30,5 +32,8 @@ run: dev
 	$(TARGET)
 
 clean:
-	$(MAKE) -C $(LIB_SOURCE_DIR) clean
 	rm -f $(TARGET)
+
+clean_all:
+	$(MAKE) -C $(LIB_SOURCE_DIR) clean
+	$(MAKE) clean

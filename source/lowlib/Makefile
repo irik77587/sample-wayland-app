@@ -6,9 +6,10 @@ XDG_HEADER=./inc/xdg-shell.h
 LIB_SOURCE=connect.cpp cursor.cpp event.cpp registry.cpp renderer.cpp shm.cpp window.cpp $(XDG_SOURCE)
 TARGET_LIB=$(TARGET_LIB_DIR)/$(TARGET_LIB_BIN)
 LFLAGS=$(shell pkg-config --libs wayland-client wayland-cursor)
+RLPATH?=-Wl,-rpath,'$$ORIGIN'/
 
 $(TARGET_LIB): $(LIB_SOURCE) $(TARGET_LIB_DIR)/libcursor-theme.so
-	gcc -shared -fPIC $(CFLAGS) $(LIB_SOURCE) -o $(TARGET_LIB) $(LFLAGS) -L$(TARGET_LIB_DIR) -lcursor-theme
+	gcc -shared -fPIC $(RLPATH) $(CFLAGS) $(LIB_SOURCE) -o $(TARGET_LIB) $(LFLAGS) -L$(TARGET_LIB_DIR) -lcursor-theme
 
 $(TARGET_LIB_DIR)/libcursor-theme.so: cursor-theme.cpp
 	mkdir -p $(TARGET_LIB_DIR)
